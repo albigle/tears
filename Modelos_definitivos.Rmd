@@ -1,0 +1,517 @@
+---
+title: "Resultados definitivos"
+output: pdf_document
+---
+```{r}
+#If you want to print all plot activate imprimir boolean
+imprimir<-FALSE
+```
+## MODELO AMINÁCIDOS        
+
+Preprocesamiento del dataset, para que esté listo para el estudio.
+
+```{r}
+library(dplyr)
+setwd("C:/Users/User/Downloads/Lagrimas/Datasets")
+datos <- read.csv2("amino_acids_v2.csv")
+row_names <- as.list(datos$Sample)
+datos <- datos[-1]
+datos$Sexe <- as.factor(datos$Sexe)
+datos$Provocada <- as.factor(datos$Provocada)
+datos$Sexe <- factor(datos$Sexe,labels=c("Cero", "Uno"))
+datos$Provocada <- factor(datos$Provocada,labels=c("No", "sí"))
+datos <- rename(Ayuno = Deju..min.,
+                .data = datos)
+datos[,3] <- as.numeric(datos[,3])
+#datos <- datos[-c(64, 65, 78, 92), ]
+nombres <- names(datos)
+print(nombres)
+
+```
+
+
+```{r}
+j = 20
+# library(car)
+for (i in c(5:25)){
+  if (i != j){
+    print(paste("*** Ln(variables originales+", 0,") *** X = ln(",nombres[j],"+", 0,") Y = ln(",nombres[i],"+",0,")***"))
+    Y <- log(datos[, i] + 0)
+    model <- lm(Y ~ Sexe * Edat + Ayuno + log(datos[, j]+ 0), data = datos)
+    summary<-summary(model)
+    shptest <- shapiro.test(model$residuals)
+    if(i == 5){
+      index<-as.list(names(summary$coefficients[,4]))
+      df1 <- data.frame(matrix(NA, nrow = length(index), ncol = 0))
+      rownames(df1) <- index
+      df4 <- data.frame(matrix(NA, nrow = length(index), ncol = 0))
+      rownames(df4) <- index
+    }
+    df1[,nombres[i]]= summary$coefficients[,4]
+    df4[,nombres[i]]= summary$coefficients[,1]
+    anova<-anova(model)
+    # anova<-Anova(model, type = "III")
+    if(i == 5){
+      index<-head(rownames(anova), -1)
+      df2 <- data.frame(matrix(NA, nrow = length(index), ncol = 0))
+      rownames(df2) <- index
+    }
+    df2[,nombres[i]]=head(anova$`Pr(>F)`, 5)
+    if(i == 5){
+      index<-c("Residual standard error", "Multiple R-squared", "Adjusted R-squared", "DF", "DF f-statistic")
+      df3 <- data.frame(matrix(NA, nrow = length(index), ncol = 0))
+      rownames(df3) <- index
+    }
+    df3[1,nombres[i]] = summary$sigma
+    df3[2,nombres[i]] =  summary$r.squared
+    df3[3,nombres[i]] = summary$adj.r.squared
+    df3[4,nombres[i]] = summary$df[2]
+    df3[5,nombres[i]] = summary$fstatistic[3]
+    
+    if(i == 5){
+      df5 <- data.frame()
+      df6 <- data.frame()
+    }
+    a<- model$model$Y/model$fitted.values
+    indices <- as.integer(names(a)) 
+    df5[indices,nombres[i]] = a
+    df6[indices,nombres[i]] = model$model$Y
+    
+    if(imprimir){
+      print(model)
+      print(anova)
+      print(paste(nombres[i],"Shapiro-Wilks p-value =",shptest$p.value))
+      par(mfrow=c(2,2))
+      plot(model)
+      par(mfrow=c(1,1))
+      car::influencePlot(model)
+    } 
+  }
+}
+rownames(df5) <- row_names
+rownames(df6) <- row_names
+```
+
+
+## MODELO AMINAS BIOGÉNICAS
+
+Preprocesamiento del dataset, para que esté listo para el estudio.
+
+```{r}
+library(dplyr)
+setwd("C:/Users/User/Downloads/Lagrimas/Datasets")
+datos <- read.csv2("biogenic_amines_v2.csv")
+row_names <- as.list(datos$Sample)
+datos <- datos[-1]
+datos$Sexe <- as.factor(datos$Sexe)
+datos$Provocada <- as.factor(datos$Provocada)
+datos$Sexe <- factor(datos$Sexe,labels=c("Cero", "Uno"))
+datos$Provocada <- factor(datos$Provocada,labels=c("no", "sí"))
+datos <- rename(Ayuno = Deju..min.,
+                .data = datos)
+datos[,3] <- as.numeric(datos[,3])
+#datos <- datos[-c(64, 65, 78, 92), ]
+nombres <- names(datos)
+print(nombres)
+```
+```{r}
+j = 10
+
+for (i in c(5:10)){
+  if (i != j){
+    print(paste("*** Ln(variables originales+", 0,") *** X = ln(",nombres[j],"+", 0,") Y = ln(",nombres[i],"+",0,")***"))
+    Y <- log(datos[, i] + 0)
+    model <- lm(Y ~ Sexe * Edat + Ayuno + log(datos[, j]+ 0), data = datos)
+    summary<-summary(model)
+    shptest <- shapiro.test(model$residuals)
+    if(i == 5){
+      index<-as.list(names(summary$coefficients[,4]))
+      df1 <- data.frame(matrix(NA, nrow = length(index), ncol = 0))
+      rownames(df1) <- index
+      df4 <- data.frame(matrix(NA, nrow = length(index), ncol = 0))
+      rownames(df4) <- index
+    }
+    df1[,nombres[i]]= summary$coefficients[,4]
+    df4[,nombres[i]]= summary$coefficients[,1]
+    anova<-anova(model)
+    # anova<-Anova(model, type = "III")
+    if(i == 5){
+      index<-head(rownames(anova), -1)
+      df2 <- data.frame(matrix(NA, nrow = length(index), ncol = 0))
+      rownames(df2) <- index
+    }
+    df2[,nombres[i]]=head(anova$`Pr(>F)`, 5)
+    if(i == 5){
+      index<-c("Residual standard error", "Multiple R-squared", "Adjusted R-squared", "DF", "DF f-statistic")
+      df3 <- data.frame(matrix(NA, nrow = length(index), ncol = 0))
+      rownames(df3) <- index
+    }
+    df3[1,nombres[i]] = summary$sigma
+    df3[2,nombres[i]] =  summary$r.squared
+    df3[3,nombres[i]] = summary$adj.r.squared
+    df3[4,nombres[i]] = summary$df[2]
+    df3[5,nombres[i]] = summary$fstatistic[3]
+    
+    if(i == 5){
+      df5 <- data.frame()
+      df6 <- data.frame()
+    }
+    a<- model$model$Y/model$fitted.values
+    indices <- as.integer(names(a)) 
+    df5[indices,nombres[i]] = a
+    df6[indices,nombres[i]] = model$model$Y
+    
+    if(imprimir){
+      print(model)
+      print(anova)
+      print(paste(nombres[i],"Shapiro-Wilks p-value =",shptest$p.value))
+      par(mfrow=c(2,2))
+      plot(model)
+      par(mfrow=c(1,1))
+      car::influencePlot(model)
+    }
+  }
+}
+rownames(df5) <- row_names
+rownames(df6) <- row_names
+```
+
+
+## MODELO ACIL CARNITINAS
+
+Preprocesamiento del dataset, para que esté listo para el estudio.
+
+```{r}
+library(dplyr)
+setwd("C:/Users/User/Downloads/Lagrimas/Datasets")
+datos <- read.csv2("acyl_carnitines_v2.csv")
+row_names <-as.list(datos$Sample)
+datos <- datos[-1]
+datos$Sexe <- as.factor(datos$Sexe)
+datos$Provocada <- as.factor(datos$Provocada)
+datos$Sexe <- factor(datos$Sexe,labels=c("Cero", "Uno"))
+datos$Provocada <- factor(datos$Provocada,labels=c("no", "sí"))
+datos <- rename(Ayuno = Deju..min.,
+                .data = datos)
+datos[,3] <- as.numeric(datos[,3])
+#datos <- datos[-c(64, 65, 78, 92), ]
+nombres <- names(datos)
+print(nombres)
+```
+```{r}
+j = 5
+
+for (i in c(5:15)){
+  if (i != j){
+    print(paste("*** Ln(variables originales+", 0,") *** X = ln(",nombres[j],"+", 0,") Y = ln(",nombres[i],"+",0,")***"))
+    Y <- log(datos[, i] + 0)
+    model <- lm(Y ~ Sexe * Edat + Ayuno + log(datos[, j]+ 0), data = datos)
+    summary<-summary(model)
+    shptest <- shapiro.test(model$residuals)
+    if(i == 6){
+      index<-as.list(names(summary$coefficients[,4]))
+      df1 <- data.frame(matrix(NA, nrow = length(index), ncol = 0))
+      rownames(df1) <- index
+      df4 <- data.frame(matrix(NA, nrow = length(index), ncol = 0))
+      rownames(df4) <- index
+    }
+    df1[,nombres[i]]= summary$coefficients[,4]
+    df4[,nombres[i]]= summary$coefficients[,1]
+    anova<-anova(model)
+    # anova<-Anova(model, type = "III")
+    if(i == 6){
+      index<-head(rownames(anova), -1)
+      df2 <- data.frame(matrix(NA, nrow = length(index), ncol = 0))
+      rownames(df2) <- index
+    }
+    df2[,nombres[i]]=head(anova$`Pr(>F)`, 5)
+    if(i == 6){
+      index<-c("Residual standard error", "Multiple R-squared", "Adjusted R-squared", "DF", "DF f-statistic")
+      df3 <- data.frame(matrix(NA, nrow = length(index), ncol = 0))
+      rownames(df3) <- index
+    }
+    df3[1,nombres[i]] = summary$sigma
+    df3[2,nombres[i]] =  summary$r.squared
+    df3[3,nombres[i]] = summary$adj.r.squared
+    df3[4,nombres[i]] = summary$df[2]
+    df3[5,nombres[i]] = summary$fstatistic[3]
+    
+    if(i == 6){
+      df5 <- data.frame()
+      df6 <- data.frame()
+    }
+    a<- model$model$Y/model$fitted.values
+    indices <- as.integer(names(a)) 
+    df5[indices,nombres[i]] = a
+    df6[indices,nombres[i]] = model$model$Y
+    
+    if(imprimir){
+      print(model)
+      print(anova)
+      print(paste(nombres[i],"Shapiro-Wilks p-value =",shptest$p.value))
+      par(mfrow=c(2,2))
+      plot(model)
+      par(mfrow=c(1,1))
+      car::influencePlot(model)
+    }
+  }
+}
+rownames(df5) <- row_names
+rownames(df6) <- row_names
+```
+
+
+## MODELO LYSO-PC        
+
+Preprocesamiento del dataset, para que esté listo para el estudio.
+
+```{r}
+library(dplyr)
+setwd("C:/Users/User/Downloads/Lagrimas/Datasets")
+datos <- read.csv2("lysoPC.csv")
+row_names <- as.list(datos$Sample)
+datos <- datos[-1]
+datos$Sexe <- as.factor(datos$Sexe)
+datos$Provocada <- as.factor(datos$Provocada)
+datos$Sexe <- factor(datos$Sexe,labels=c("Cero", "Uno"))
+datos$Provocada <- factor(datos$Provocada,labels=c("No", "sí"))
+datos <- rename(Ayuno = Deju..min.,
+                .data = datos)
+datos[,3] <- as.numeric(datos[,3])
+#datos <- datos[-c(64, 65, 78, 92), ]
+nombres <- names(datos)
+print(nombres)
+```
+
+
+```{r}
+j = 6
+
+for (i in c(5:12)){
+  if (i != j){
+    print(paste("*** Ln(variables originales+", 0,") *** X = ln(",nombres[j],"+", 0,") Y = ln(",nombres[i],"+",0,")***"))
+    Y <- log(datos[, i] + 0)
+    model <- lm(Y ~ Sexe * Edat + Ayuno + log(datos[, j]+ 0), data = datos)
+    summary<-summary(model)
+    shptest <- shapiro.test(model$residuals)
+    if(i == 5){
+      index<-as.list(names(summary$coefficients[,4]))
+      df1 <- data.frame(matrix(NA, nrow = length(index), ncol = 0))
+      rownames(df1) <- index
+      df4 <- data.frame(matrix(NA, nrow = length(index), ncol = 0))
+      rownames(df4) <- index
+    }
+    df1[,nombres[i]]= summary$coefficients[,4]
+    df4[,nombres[i]]= summary$coefficients[,1]
+    anova<-anova(model)
+    # anova<-Anova(model, type = "III")
+    if(i == 5){
+      index<-head(rownames(anova), -1)
+      df2 <- data.frame(matrix(NA, nrow = length(index), ncol = 0))
+      rownames(df2) <- index
+    }
+    df2[,nombres[i]]=head(anova$`Pr(>F)`, 5)
+    if(i == 5){
+      index<-c("Residual standard error", "Multiple R-squared", "Adjusted R-squared", "DF", "DF f-statistic")
+      df3 <- data.frame(matrix(NA, nrow = length(index), ncol = 0))
+      rownames(df3) <- index
+    }
+    df3[1,nombres[i]] = summary$sigma
+    df3[2,nombres[i]] =  summary$r.squared
+    df3[3,nombres[i]] = summary$adj.r.squared
+    df3[4,nombres[i]] = summary$df[2]
+    df3[5,nombres[i]] = summary$fstatistic[3]
+    
+    if(i == 5){
+      df5 <- data.frame()
+      df6 <- data.frame()
+    }
+    a<- model$model$Y/model$fitted.values
+    indices <- as.integer(names(a)) 
+    df5[indices,nombres[i]] = a
+    df6[indices,nombres[i]] = model$model$Y
+    
+    if(imprimir){
+      print(model)
+      print(anova)
+      print(paste(nombres[i],"Shapiro-Wilks p-value =",shptest$p.value))
+      par(mfrow=c(2,2))
+      plot(model)
+      par(mfrow=c(1,1))
+      car::influencePlot(model)
+    }
+  }
+}
+rownames(df5) <- row_names
+rownames(df6) <- row_names
+```
+
+## MODELO PC        
+
+Preprocesamiento del dataset, para que esté listo para el estudio.
+
+```{r}
+library(dplyr)
+setwd("C:/Users/User/Downloads/Lagrimas/Datasets")
+datos <- read.csv2("PC.csv")
+row_names <- as.list(datos$Sample)
+datos <- datos[-1]
+datos$Sexe <- as.factor(datos$Sexe)
+datos$Provocada <- as.factor(datos$Provocada)
+datos$Sexe <- factor(datos$Sexe,labels=c("Cero", "Uno"))
+datos$Provocada <- factor(datos$Provocada,labels=c("No", "sí"))
+datos <- rename(Ayuno = Deju..min.,
+                .data = datos)
+datos[,3] <- as.numeric(datos[,3])
+#datos <- datos[-c(64, 65, 78, 92), ]
+nombres <- names(datos)
+print(nombres)
+```
+
+
+```{r}
+j = 5
+
+for (i in c(5:19)){
+  if (i != j){
+    print(paste("*** Ln(variables originales+", 0,") *** X = ln(",nombres[j],"+", 0,") Y = ln(",nombres[i],"+",0,")***"))
+    Y <- log(datos[, i] + 0)
+    model <- lm(Y ~ Sexe * Edat + Ayuno + log(datos[, j]+ 0), data = datos)
+    summary<-summary(model)
+    shptest <- shapiro.test(model$residuals)
+    if(i == 6){
+      index<-as.list(names(summary$coefficients[,4]))
+      df1 <- data.frame(matrix(NA, nrow = length(index), ncol = 0))
+      rownames(df1) <- index
+      df4 <- data.frame(matrix(NA, nrow = length(index), ncol = 0))
+      rownames(df4) <- index
+    }
+    df1[,nombres[i]]= summary$coefficients[,4]
+    df4[,nombres[i]]= summary$coefficients[,1]
+    anova<-anova(model)
+    # anova<-Anova(model, type = "III")
+    if(i == 6){
+      index<-head(rownames(anova), -1)
+      df2 <- data.frame(matrix(NA, nrow = length(index), ncol = 0))
+      rownames(df2) <- index
+    }
+    df2[,nombres[i]]=head(anova$`Pr(>F)`, 5)
+    if(i == 6){
+      index<-c("Residual standard error", "Multiple R-squared", "Adjusted R-squared", "DF", "DF f-statistic")
+      df3 <- data.frame(matrix(NA, nrow = length(index), ncol = 0))
+      rownames(df3) <- index
+    }
+    df3[1,nombres[i]] = summary$sigma
+    df3[2,nombres[i]] =  summary$r.squared
+    df3[3,nombres[i]] = summary$adj.r.squared
+    df3[4,nombres[i]] = summary$df[2]
+    df3[5,nombres[i]] = summary$fstatistic[3]
+    
+    if(i == 6){
+      df5 <- data.frame()
+      df6 <- data.frame()
+    }
+    a<- model$model$Y/model$fitted.values
+    indices <- as.integer(names(a)) 
+    df5[indices,nombres[i]] = a
+    df6[indices,nombres[i]] = model$model$Y
+    
+    if(imprimir){
+      print(model)
+      print(anova)
+      print(paste(nombres[i],"Shapiro-Wilks p-value =",shptest$p.value))
+      par(mfrow=c(2,2))
+      plot(model)
+      par(mfrow=c(1,1))
+      car::influencePlot(model)
+    }
+  }
+}
+rownames(df5) <- row_names
+rownames(df6) <- row_names
+```
+
+## MODELO SM       
+
+Preprocesamiento del dataset, para que esté listo para el estudio.
+
+```{r}
+library(dplyr)
+setwd("C:/Users/User/Downloads/Lagrimas/Datasets")
+datos <- read.csv2("SM.csv")
+row_names <- as.list(datos$Sample)
+datos <- datos[-1]
+datos$Sexe <- as.factor(datos$Sexe)
+datos$Provocada <- as.factor(datos$Provocada)
+datos$Sexe <- factor(datos$Sexe,labels=c("Cero", "Uno"))
+datos$Provocada <- factor(datos$Provocada,labels=c("No", "sí"))
+datos <- rename(Ayuno = Deju..min.,
+                .data = datos)
+datos[,3] <- as.numeric(datos[,3])
+#datos <- datos[-c(64, 65, 78, 92), ]
+nombres <- names(datos)
+print(nombres)
+```
+
+
+```{r}
+j = 10
+
+for (i in c(5:16)){
+  if (i != j){
+    print(paste("*** Ln(variables originales+", 0,") *** X = ln(",nombres[j],"+", 0,") Y = ln(",nombres[i],"+",0,")***"))
+    Y <- log(datos[, i] + 0)
+    model <- lm(Y ~ Sexe * Edat + Ayuno + log(datos[, j]+ 0), data = datos)
+    summary<-summary(model)
+    shptest <- shapiro.test(model$residuals)
+    if(i == 5){
+      index<-as.list(names(summary$coefficients[,4]))
+      df1 <- data.frame(matrix(NA, nrow = length(index), ncol = 0))
+      rownames(df1) <- index
+      df4 <- data.frame(matrix(NA, nrow = length(index), ncol = 0))
+      rownames(df4) <- index
+    }
+    df1[,nombres[i]]= summary$coefficients[,4]
+    df4[,nombres[i]]= summary$coefficients[,1]
+    anova<-anova(model)
+    # anova<-Anova(model, type = "III")
+    if(i == 5){
+      index<-head(rownames(anova), -1)
+      df2 <- data.frame(matrix(NA, nrow = length(index), ncol = 0))
+      rownames(df2) <- index
+    }
+    df2[,nombres[i]]=head(anova$`Pr(>F)`, 5)
+    if(i == 5){
+      index<-c("Residual standard error", "Multiple R-squared", "Adjusted R-squared", "DF", "DF f-statistic")
+      df3 <- data.frame(matrix(NA, nrow = length(index), ncol = 0))
+      rownames(df3) <- index
+    }
+    df3[1,nombres[i]] = summary$sigma
+    df3[2,nombres[i]] =  summary$r.squared
+    df3[3,nombres[i]] = summary$adj.r.squared
+    df3[4,nombres[i]] = summary$df[2]
+    df3[5,nombres[i]] = summary$fstatistic[3]
+    
+    if(i == 5){
+      df5 <- data.frame()
+      df6 <- data.frame()
+    }
+    a<- model$model$Y/model$fitted.values
+    indices <- as.integer(names(a)) 
+    df5[indices,nombres[i]] = a
+    df6[indices,nombres[i]] = model$model$Y
+    
+    if(imprimir){
+      print(model)
+      print(anova)
+      print(paste(nombres[i],"Shapiro-Wilks p-value =",shptest$p.value))
+      par(mfrow=c(2,2))
+      plot(model)
+      par(mfrow=c(1,1))
+      car::influencePlot(model)
+    }
+  }
+}
+rownames(df5) <- row_names
+rownames(df6) <- row_names
+```
